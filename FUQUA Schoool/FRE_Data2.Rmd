@@ -1,0 +1,62 @@
+---
+title: "Risk Management, Class 2"
+author: "Omar Alfaro-Rivera"
+date: "25/8/2020"
+output: html_document
+---
+
+# Load de data 
+
+## WILL5000IND
+```{r, warning=FALSE, message=FALSE}
+library(quantmod)
+wilsh <- getSymbols("WILL5000IND", src='FRED', auto.assign = FALSE)
+wilsh <-na.omit(wilsh)
+wilsh <- wilsh["1979-12-31/2017-12-31"]
+names(wilsh) = "TR"
+logret <- diff(log(wilsh))[-1]
+````
+
+## Calculate mean and standard deviation
+```{r}
+mu = round(mean(logret),8)
+sig = round(sd(logret),8)
+```
+
+## Value-at-Risk
+
+```{r}
+round(qnorm(0.05,mu,sig),6)
+```
+
+## Quiz 1
+
+```{r, warning=FALSE, message=FALSE}
+library(quantmod)
+wilsh <- getSymbols("GOLDPMGBD228NLBM", src='FRED', auto.assign = FALSE)
+wilsh <-na.omit(wilsh)
+wilsh <- wilsh["1979-12-31/2017-12-31"]
+names(wilsh) = "Gold"
+logret <- diff(log(wilsh))[-1]
+````
+
+## Calculate mean and standard deviation
+```{r}
+mu = round(mean(logret),8)
+sig = round(sd(logret),8)
+```
+
+## Quizz 2 (Value-at-Risk)
+
+```{r}
+var = round(qnorm(0.05,mu,sig),6)
+var
+```
+VaR of the daily change in its assets
+```{r}
+HFvar <- 1000 * ( exp(var)-1 ) 
+HFvar
+```
+
+
+

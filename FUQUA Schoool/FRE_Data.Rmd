@@ -1,0 +1,191 @@
+---
+title: "Risk Management, class1"
+author: "Omar Alfaro-Rivera"
+date: "18/8/2020"
+output: html_document
+---
+# Obtain data from the FRED
+
+## WILL5000IND
+```{r, warning=FALSE, message=FALSE}
+library(quantmod)
+wilsh <- getSymbols("WILL5000IND", src='FRED', auto.assign = FALSE)
+wilsh <-na.omit(wilsh)
+wilsh <- wilsh["1979-12-31/2017-12-31"]
+names(wilsh) = "TR"
+head(wilsh, 3)
+tail(wilsh,3)
+```
+
+### Daily return
+```{r}
+logret <- diff(log(wilsh))[-1]
+round(head(logret,3),6)
+plot(logret)
+```
+
+Discrete return 
+
+```{r}
+ret <- exp(logret) - 1
+round(head(ret,3),6) 
+```
+
+
+## Other periods return 
+```{r}
+logret.w <- apply.weekly(logret,sum)
+logret.m <- apply.monthly(logret,sum)
+logret.q <- apply.quarterly(logret,sum)
+logret.y <- apply.yearly(logret,sum)
+````
+
+loger horizont discrete return 
+
+```{r}
+ret.w <- exp(logret.w)-1
+ret.m <- exp(logret.m)-1
+ret.q <- exp(logret.q)-1
+ret.y <- exp(logret.y)-1
+```
+
+
+## Gold
+
+You can also embed plots, for example:
+
+```{r cars}
+
+wilsh <- getSymbols("GOLDPMGBD228NLBM", src='FRED', auto.assign = FALSE)
+wilsh <-na.omit(wilsh)
+wilsh <- wilsh["1979-12-31/2017-12-31"]
+names(wilsh) = "Gold"
+head(wilsh, 3)
+tail(wilsh,3)
+plot(wilsh)
+```
+
+
+### Daily return
+```{r}
+logret <- diff(log(wilsh))[-1]
+round(head(logret,3),6)
+round(tail(logret,3),6)
+plot(logret)
+```
+
+Discrete return 
+
+```{r}
+ret <- exp(logret) - 1
+round(head(ret,3),6) 
+```
+
+## Loger horizont return 
+
+```{r}
+logret.w <- apply.weekly(logret,sum)
+logret.m <- apply.monthly(logret,sum)
+logret.q <- apply.quarterly(logret,sum)
+logret.y <- apply.yearly(logret,sum)
+round(head(logret.w,3),6)
+round(head(logret.m,3),6)
+round(head(logret.q,3),6)
+round(head(logret.y,3),6)
+
+round(tail(logret.w,3),6)
+round(tail(logret.m,3),6)
+round(tail(logret.q,3),6)
+round(tail(logret.y,3),6)
+````
+
+Discrete return 
+
+```{r}
+ret.w <- exp(logret.w)-1
+ret.m <- exp(logret.m)-1
+ret.q <- exp(logret.q)-1
+ret.y <- exp(logret.y)-1
+
+round(head(ret.m,3),6)
+```
+
+
+
+
+
+# Quiz 1
+
+```{r, warning=FALSE, message=FALSE}
+wilsh <- getSymbols("DEXJPUS", src='FRED', auto.assign = FALSE)
+wilsh <-na.omit(wilsh)
+wilsh <- wilsh["1979-12-31/2017-12-31"]
+names(wilsh) = "JPUS"
+
+wilsh$JPUS = 1/wilsh$JPUS
+
+logret <- diff(log(wilsh))[-1]
+
+logret.w <- apply.weekly(logret,sum)
+logret.m <- apply.monthly(logret,sum)
+logret.q <- apply.quarterly(logret,sum)
+logret.y <- apply.yearly(logret,sum)
+
+ret.w <- exp(logret.w)-1
+ret.m <- exp(logret.m)-1
+ret.q <- exp(logret.q)-1
+ret.y <- exp(logret.y)-1
+```
+
+# Question 1 and 2
+```{r}
+round(head(logret,1),6)
+```
+
+# Question 3 and 4
+```{r}
+round(head(logret.m,1),6)
+```
+
+# Question 5 and 6
+```{r}
+round(tail(logret.q,1),6)
+```
+
+# Question 5 and 6
+```{r}
+round(tail(ret.y,1),6)
+```
+
+
+
+## Loger horizont return 
+
+```{r}
+logret.w <- apply.weekly(logret,sum)
+logret.m <- apply.monthly(logret,sum)
+logret.q <- apply.quarterly(logret,sum)
+logret.y <- apply.yearly(logret,sum)
+round(head(logret.w,3),6)
+round(head(logret.m,3),6)
+round(head(logret.q,3),6)
+round(head(logret.y,3),6)
+
+round(tail(logret.w,3),6)
+round(tail(logret.m,3),6)
+round(tail(logret.q,3),6)
+round(tail(logret.y,3),6)
+````
+
+Discrete return 
+
+```{r}
+ret.w <- exp(logret.w)-1
+ret.m <- exp(logret.m)-1
+ret.q <- exp(logret.q)-1
+ret.y <- exp(logret.y)-1
+
+round(head(na.omit(ret.q),3),6)
+round(tail(na.omit(ret.q),3),6)
+
+```
