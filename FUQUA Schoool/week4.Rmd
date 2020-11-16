@@ -1,7 +1,12 @@
-# Week 4
+---
+title: "Risk Management, class1"
+author: "Omar Alfaro-Rivera"
+date: "18/8/2020"
+output: html_document
+---
 
-## Future vs Historical Distribution 
-```{r}
+# Future vs Historical Distribution 
+```{r message=FALSE}
 library(quantmod)
 library(moments)
 
@@ -71,4 +76,30 @@ fit.garch.n
 
 save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
 names(save1) = c('logret', 's', 'z')
+```
+
+# GARCH(1,1) -t 
+
+* Change the distribution equation to a rescaled t distribution 
+
+* Here is the GARCH(1,1) -t model:
+$r_t=\alpha_0+ \sqrt{h_t}\varepsilon_t$ (mean equation)
+$h_t= \alpha_0+\beta_1h_{t-1}+ \alpha_1\varepsilon^2_{t-1}$ (variance equation)
+$\varepsilon_t \sim t(v)/\sqrt{\frac{v}{v-2}}$ (distribution model)
+
+
+## Estimation rugarch package
+```{r}
+library(rugarch)
+garch.N <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                      mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
+                      distribution.model = "std")
+
+fit.garch.n = ugarchfit(spec = garch.N, data = logret)
+fit.garch.n
+
+save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
+names(save1) = c('logret', 's', 'z')
+plot(save1$logret)
+lines(logret, col="red", alpha=0.25)
 ```
