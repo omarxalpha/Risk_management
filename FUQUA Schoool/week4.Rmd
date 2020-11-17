@@ -71,11 +71,12 @@ garch.N <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1
                       mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
                       distribution.model = "norm")
 
-fit.garch.n = ugarchfit(spec = garch.N, data = logret)
-fit.garch.n
+fit.garch.t = ugarchfit(spec = garch.N, data = logret)
+fit.garch.t
 
-save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
+save1 = cbind(logret, fit.garch.t@fit$sigma, fit.garch.t@fit$z)
 names(save1) = c('logret', 's', 'z')
+parml <- fit.garch.t@fit$coef
 ```
 
 # GARCH(1,1) -t 
@@ -101,5 +102,8 @@ fit.garch.n
 save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
 names(save1) = c('logret', 's', 'z')
 plot(save1$logret)
-lines(logret, col="red", alpha=0.25)
 ```
+
+# Diagnostic test
+
+  

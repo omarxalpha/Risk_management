@@ -30,7 +30,7 @@ ret_W
 
 USUK <-getSymbols("DEXUSUK", src = "FRED", auto.assign = FALSE)
 USUK <- na.omit(USUK)
-USUK <- USUK["1979-12-31/2017-12-21"]
+USUK <- USUK["1979-12-31/2017-12-31"]
 names(USUK) <-"EXUSK"
 
 plot(log(USUK))
@@ -39,7 +39,7 @@ tail(USUK, 3)
 
 #Return 
 
-lret_USUK <- diff(log(USUK$EXUSK^-1))[-1]
+lret_USUK <- diff(log(USUK$EXUSK))[-1]
 round(head(lret_USUK, 3),6)
 
 plot(lret_USUK)
@@ -55,10 +55,13 @@ ret_m<-exp(logret_m)-1
 ret_q<-exp(logret_q)-1
 ret_y<-exp(logret_y)-1
 
-round(last(ret_q,1),6)
+round(head(ret_m,1),6)
 
       
+round(last(logret_q,1),6)
+
 round(last(ret_y,1),6)
+
 
 #Quiz3
 
