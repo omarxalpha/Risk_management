@@ -67,16 +67,16 @@ $h_t = \alpha_0+{1/2}*h_{t-1}+{1/2}*\varepsilon^2_{t-1}$
 ## Estimation rugarch package
 ```{r}
 library(rugarch)
-garch.N <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+garch.n <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
                       mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
                       distribution.model = "norm")
 
-fit.garch.t = ugarchfit(spec = garch.N, data = logret)
-fit.garch.t
+fit.garch.n = ugarchfit(spec = garch.n, data = logret)
+fit.garch.n
 
-save1 = cbind(logret, fit.garch.t@fit$sigma, fit.garch.t@fit$z)
+save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
 names(save1) = c('logret', 's', 'z')
-parml <- fit.garch.t@fit$coef
+parml <- fit.garch.n@fit$coef
 ```
 
 # GARCH(1,1) -t 
@@ -92,18 +92,204 @@ $\varepsilon_t \sim t(v)/\sqrt{\frac{v}{v-2}}$ (distribution model)
 ## Estimation rugarch package
 ```{r}
 library(rugarch)
-garch.N <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+garch.t <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
                       mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
                       distribution.model = "std")
 
-fit.garch.n = ugarchfit(spec = garch.N, data = logret)
-fit.garch.n
+fit.garch.t = ugarchfit(spec = garch.t, data = logret)
+fit.garch.t
 
-save1 = cbind(logret, fit.garch.n@fit$sigma, fit.garch.n@fit$z)
+save1 = cbind(logret, fit.garch.t@fit$sigma, fit.garch.t@fit$z)
 names(save1) = c('logret', 's', 'z')
-plot(save1$logret)
 ```
+
 
 # Diagnostic test
 
+```{r}
+acf(save1$z)
+
+acf(abs(save1$z))
+```
   
+# Using ugarchboot function 
+
+```{r}
+RNGkind(sample.kind = "Rounding")
+set.seed(123789)
+boot.garch <- ugarchboot(fit.garch.t,
+                         method = "Partial",
+                         sampling = "raw",  #bootstrap from fitted varepsilon
+                         n.ahead = 1,          #simulation horizon
+                         n.bootpred = 100000, #number of simulations 
+                         solver = "solnp")
+
+rvec <- boot.garch@fseries
+alpha <- 0.05
+VaR <- quantile(rvec, alpha)
+ES <- mean(rvec[rvec<VaR])
+round(VaR,6)
+round(ES,6)
+
+```
+## Lehman Brothers bankruptcy
+```{r}
+fit.garch.t = ugarchfit(spec = garch.t, data = logret["1979-12-31/2008-09-15"])
+RNGkind(sample.kind = "Rounding")
+set.seed(123789)
+boot.garch <- ugarchboot(fit.garch.t,
+                         method = "Partial",
+                         sampling = "raw",  #bootstrap from fitted varepsilon
+                         n.ahead = 1,          #simulation horizon
+                         n.bootpred = 100000, #number of simulations 
+                         solver = "solnp")
+
+rvec <- boot.garch@fseries
+alpha <- 0.05
+VaR <- quantile(rvec, alpha)
+ES <- mean(rvec[rvec<VaR])
+round(VaR,6)
+round(ES,6)
+
+
+```
+
+## drop of 1987
+```{r}
+fit.garch.t = ugarchfit(spec = garch.t, data = logret["1979-12-31/1987-10-19"])
+RNGkind(sample.kind = "Rounding")
+set.seed(123789)
+boot.garch <- ugarchboot(fit.garch.t,
+                         method = "Partial",
+                         sampling = "raw",  #bootstrap from fitted varepsilon
+                         n.ahead = 1,          #simulation horizon
+                         n.bootpred = 100000, #number of simulations 
+                         solver = "solnp")
+
+rvec <- boot.garch@fseries
+alpha <- 0.05
+VaR <- quantile(rvec, alpha)
+ES <- mean(rvec[rvec<VaR])
+round(VaR,6)
+round(ES,6)
+
+
+```
+
+
+
+# Using ugarchroll function 
+
+```{r}
+n2016 <- length(logret["1980-01-01/2016-12-31"])
+roll.garch <- ugarchroll(spec = garch.t,
+                         data = logret,
+                         n.ahead = 1,
+                         forecast.length = 1,
+                         n.start = n2016,
+                         refit.every = 1,
+                         refit.window = "recursive",
+                         calculate.VaR = TRUE,
+                         VaR.alpha = 0.05,
+                         keep.coef = TRUE)
+
+```
+
+# Quiz 1
+
+```{r message=FALSE}
+JPUS<-getSymbols("DEXJPUS", src = "FRED", auto.assign = FALSE)
+JPUS <- na.omit(JPUS)
+JPUS <-1/JPUS
+JPUS <- JPUS["1979-12-31/2017-12-31"]
+names(JPUS) <-"TR"
+logret <- diff(log(JPUS$TR))[-1]
+```
+## Volatility clustering
+```{r}
+acf(logret)
+acf(abs(logret))
+
+```
+  
+## Estimation rugarch package
+
+```{r}
+garch.t <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                      mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
+                      distribution.model = "std")
+
+fit.garch.t = ugarchfit(spec = garch.t, data = logret)
+fit.garch.t
+
+```
+
+# Using ugarchboot function 
+
+```{r}
+RNGkind(sample.kind = "Rounding")
+set.seed(123789)
+boot.garch <- ugarchboot(fit.garch.t,
+                         method = "Partial",
+                         sampling = "raw",  #bootstrap from fitted varepsilon
+                         n.ahead = 1,          #simulation horizon
+                         n.bootpred = 100000, #number of simulations 
+                         solver = "solnp")
+
+rvec <- boot.garch@fseries
+alpha <- 0.05
+VaR <- quantile(rvec, alpha)
+ES <- mean(rvec[rvec<VaR])
+round(VaR,6)
+round(ES,6)
+
+```
+
+# Quiz 2
+
+```{r message=FALSE}
+JPUS<-getSymbols("DEXUSUK", src = "FRED", auto.assign = FALSE)
+JPUS <- na.omit(JPUS)
+JPUS <- JPUS["1979-12-31/2017-12-31"]
+names(JPUS) <-"TR"
+logret <- diff(log(JPUS$TR))[-1]
+```
+## Volatility clustering
+```{r}
+acf(logret)
+acf(abs(logret))
+
+```
+  
+## Estimation rugarch package
+
+```{r}
+garch.t <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                      mean.model = list(armaOrder =c(0,0), include.mean=TRUE),
+                      distribution.model = "std")
+
+fit.garch.t = ugarchfit(spec = garch.t, data = logret)
+fit.garch.t
+
+```
+
+# Using ugarchboot function 
+
+```{r}
+RNGkind(sample.kind = "Rounding")
+set.seed(123789)
+boot.garch <- ugarchboot(fit.garch.t,
+                         method = "Partial",
+                         sampling = "raw",  #bootstrap from fitted varepsilon
+                         n.ahead = 1,          #simulation horizon
+                         n.bootpred = 100000, #number of simulations 
+                         solver = "solnp")
+
+rvec <- boot.garch@fseries
+alpha <- 0.05
+VaR <- quantile(rvec, alpha)
+ES <- mean(rvec[rvec<VaR])
+round(VaR,6)
+round(ES,6)
+
+```
